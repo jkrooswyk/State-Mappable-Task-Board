@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mappable Task Board</title>
+    <meta name="Name"    content="Mappable Task Board" />
+    <meta name="Version" content="1.0" />
+    <meta name="Vendor"  content="Rally Labs" />
+    <meta name="Author" content="Charles Ferentchak and Joel Krooswyk" />
+
+    <!--
+    ** This software is provided without guarantee, support or warranty. 
+    ** To use this app, you must create a drop-down custom field for tasks.  The name of this field
+    ** must be entered in the "mappedFromField" below.
+    ** Values for that field must be mapped to default states in the "fieldNameMap" below.
+    ** Look for the instructions on lines 37 and 40 in the app below to finalize.
+    **
+    ** WARNING - IF YOU CHANGE STATES VIA THE ITERATION TASK STATUS PAGE, YOU MAY GET OUT OF SYNC
+    ** WITH THE TASK BOARD APP IF THE CUSTOM FIELD IS NOT UPDATED FOR THE TASK AT THE SAME TIME.
+    **
+    ** Cards WILL NOT SHOW UP unless the custom field is added for tasks.
+    ** 
+    ** (c) 2012 Rally Software
+  -->
+
+<!--Include SDK-->
+<script type="text/javascript" src="https://rally1.rallydev.com/apps/2.0p/sdk.js"></script>
+
+<!--App code-->
+<script type="text/javascript">
+
+    Rally.onReady(function() {
+
+        Ext.define('CustomApp', {
+            extend: 'Rally.app.App',
+            componentCls: 'app',
+            mappedToField:"State",
+            // ENTER THE CUSTOM FIELD NAME BELOW INSIDE THE QUOTES
+            mappedFromField:"TaskStatus",
+
+            // ENTER THE CUSTOM FIELD VALUES IN FRONT OF THE STATE VALUES IN THE MAP BELOW
+            // ADD OR REMOVE LINES AS NECESSARY, NOTE THE COMMA AFTER ALL BUT THE LAST LINE
+            fieldNameMap:{
+                "Defined":"Defined",
+                "In Dev":"In-Progress",
+                "Unit Test":"In-Progress",
+                "Functional Test":"In-Progress",
+                "Ready to Merge":"In-Progress",
+                "Complete":"Completed"
+            },
+
+            launch: function() {
+                this.add({
+                    xtype:'rallycardboard',
+                    types:['task'],
+                    attribute: this.mappedFromField,
+                    listeners:{
+                        beforecarddroppedsave:function(cardboard, card) {
+                            //map the new state from on this card to the new state
+                            var newState = this.fieldNameMap[card.record.get(this.mappedFromField)];
+                            card.record.set(this.mappedToField, newState);
+                        },
+                        scope:this
+                    }
+                });
+            }
+        });
+
+        Rally.launchApp('CustomApp', {
+            name: 'My Custom App'
+        });
+
+    });
+
+</script>
+
+
+</head>
+<body class="myApp">
+</body>
+</html>
